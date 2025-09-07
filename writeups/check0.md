@@ -1,11 +1,11 @@
 Checkpoint 0 Writeup
 ====================
 
-My name: [your name here]
+My name: [Ayesha Ghaznavi]
 
-My SUNet ID: [your sunetid here]
+My SUNet ID: [i232025]
 
-I collaborated with: [list sunetids here]
+I collaborated with: [l230524]
 
 I would like to credit/thank these classmates for their help: [list sunetids here]
 
