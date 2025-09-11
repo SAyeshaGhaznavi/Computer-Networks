@@ -58,3 +58,6 @@ public:
     uint64_t bytes_buffered() const;
     uint64_t bytes_popped() const;
 };
+
+//added
+void read( Reader& reader, uint64_t max_len, std::string& out );
