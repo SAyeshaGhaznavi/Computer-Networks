@@ -1,75 +1,81 @@
 #include "byte_stream.hh"
+
+#include <algorithm>
+
 using namespace std;
 
-ByteStream::ByteStream(uint64_t capacity)
-    : buffer_(),
-      capacity_(capacity),
-      bytes_pushed_(0),
-      bytes_popped_(0),
-      closed_(false),
-      has_error_(false) {}
+ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ) {}
 
+// for writer
 
-//the methods for writer functionality
-void Writer::push(string data)
+void Writer::push( string data )
 {
-    uint64_t space = available_capacity();
-    uint64_t n = min(space, (uint64_t)data.size());
+// Determine writable bytes (do not exceed available capacity)
+uint64_t buf_size = static_cast<uint64_t>(buffer_.size());
+uint64_t avail = capacity_ > buf_size ? (capacity_ - buf_size) : 0;
+uint64_t want = static_cast<uint64_t>(data.size());
+uint64_t writable = std::min(avail, want);
 
-    for (uint64_t i = 0; i < n; i++)
-        buffer_.push_back(data[i]);
+if (writable == 0u) return;
 
-    bytes_pushed_ += n;
+// append only the writable prefix
+buffer_.append( data.data(), static_cast<size_t>(writable) );
+bytes_pushed_ += writable;
 }
 
 void Writer::close()
 {
-    closed_ = true;
+closed_ = true;
 }
 
 bool Writer::is_closed() const
 {
-    return closed_;
+return closed_;
 }
 
 uint64_t Writer::available_capacity() const
 {
-    return capacity_ - buffer_.size();
+uint64_t buf_size = static_cast<uint64_t>(buffer_.size());
+return buf_size >= capacity_ ? 0u : (capacity_ - buf_size);
 }
 
 uint64_t Writer::bytes_pushed() const
 {
-    return bytes_pushed_;
+return bytes_pushed_;
 }
 
-//the methods for the reader functionality
+// for reader
+
 string_view Reader::peek() const
 {
-    if (buffer_.empty()) return {};
-    return string_view(&buffer_.front(), 1);
+// Safe: buffer_ is a contiguous std::string, so we can return a string_view into it.
+if (buffer_.empty()) return string_view();
+return string_view( buffer_.data(), buffer_.size() );
 }
 
-void Reader::pop(uint64_t len)
+void Reader::pop( uint64_t len )
 {
-    uint64_t n = min(len, (uint64_t)buffer_.size());
+if (buffer_.empty()) return;
 
-    for (uint64_t i = 0; i < n; i++)
-        buffer_.pop_front();
+uint64_t buf_size = static_cast<uint64_t>(buffer_.size());
+uint64_t n = std::min( len, buf_size );
 
-    bytes_popped_ += n;
+// erase the first n bytes
+buffer_.erase( 0, static_cast<size_t>(n) );
+bytes_popped_ += n;
 }
 
 bool Reader::is_finished() const
 {
-    return closed_ && buffer_.empty();
+return closed_ && buffer_.empty();
 }
 
 uint64_t Reader::bytes_buffered() const
 {
-    return buffer_.size();
+return static_cast<uint64_t>(buffer_.size());
 }
 
 uint64_t Reader::bytes_popped() const
 {
-    return bytes_popped_;
+return bytes_popped_;
 }
