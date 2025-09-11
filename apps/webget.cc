@@ -7,8 +7,7 @@
 
 using namespace std;
 
-void get_URL(const string& host, const string& path)
-{
+void get_URL(const string& host, const string& path) {
     TCPSocket tcp_socket;
     Address address(host, "http");
     tcp_socket.connect(address);
@@ -17,13 +16,12 @@ void get_URL(const string& host, const string& path)
     request  = "GET " + path + " HTTP/1.1\r\n";
     request += "Host: " + host + "\r\n";
     request += "Connection: close\r\n";
-    request += "\r\n";
+    request += "\r\n";   // blank line to end headers
 
     tcp_socket.write(request);
 
     string buffer;
     while (!tcp_socket.eof()) {
-        buffer.clear();
         tcp_socket.read(buffer);
         cout << buffer;
     }
