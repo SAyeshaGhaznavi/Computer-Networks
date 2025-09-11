@@ -1,56 +1,75 @@
 #include "byte_stream.hh"
-
 using namespace std;
 
-ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ) {}
+ByteStream::ByteStream(uint64_t capacity)
+    : buffer_(),
+      capacity_(capacity),
+      bytes_pushed_(0),
+      bytes_popped_(0),
+      closed_(false),
+      has_error_(false) {}
 
-void Writer::push( string data )
+
+//the methods for writer functionality
+void Writer::push(string data)
 {
-  (void)data; // Your code here.
+    uint64_t space = available_capacity();
+    uint64_t n = min(space, (uint64_t)data.size());
+
+    for (uint64_t i = 0; i < n; i++)
+        buffer_.push_back(data[i]);
+
+    bytes_pushed_ += n;
 }
 
 void Writer::close()
 {
-  // Your code here.
+    closed_ = true;
 }
 
 bool Writer::is_closed() const
 {
-  return {}; // Your code here.
+    return closed_;
 }
 
 uint64_t Writer::available_capacity() const
 {
-  return {}; // Your code here.
+    return capacity_ - buffer_.size();
 }
 
 uint64_t Writer::bytes_pushed() const
 {
-  return {}; // Your code here.
+    return bytes_pushed_;
 }
 
+//the methods for the reader functionality
 string_view Reader::peek() const
 {
-  return {}; // Your code here.
+    if (buffer_.empty()) return {};
+    return string_view(&buffer_.front(), buffer_.size());
 }
 
-void Reader::pop( uint64_t len )
+void Reader::pop(uint64_t len)
 {
-  (void)len; // Your code here.
+    uint64_t n = min(len, (uint64_t)buffer_.size());
+
+    for (uint64_t i = 0; i < n; i++)
+        buffer_.pop_front();
+
+    bytes_popped_ += n;
 }
 
 bool Reader::is_finished() const
 {
-  return {}; // Your code here.
+    return closed_ && buffer_.empty();
 }
 
 uint64_t Reader::bytes_buffered() const
 {
-  return {}; // Your code here.
+    return buffer_.size();
 }
 
 uint64_t Reader::bytes_popped() const
 {
-  return {}; // Your code here.
+    return bytes_popped_;
 }
-
