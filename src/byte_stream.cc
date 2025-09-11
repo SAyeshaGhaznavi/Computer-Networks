@@ -73,12 +73,3 @@ uint64_t Reader::bytes_popped() const
 {
     return bytes_popped_;
 }
-
-//added
-void read( Reader& reader, uint64_t max_len, std::string& out )
-{
-    std::string_view data = reader.peek();
-    uint64_t n = std::min<uint64_t>( data.size(), max_len );
-    out.append( data.substr( 0, n ) );
-    reader.pop( n );
-}
