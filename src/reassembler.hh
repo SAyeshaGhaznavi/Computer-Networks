@@ -1,12 +1,24 @@
 #pragma once
 
 #include "byte_stream.hh"
+#include <map>
+//using map for easy auto sorting and nlogn insertions
+#include <string>
+#include <optional>
+#include <cstdint>
+
+using namespace std;
 
 class Reassembler
 {
 public:
   // Construct Reassembler to write into given ByteStream.
-  explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ) {}
+  explicit Reassembler(ByteStream&& output)
+        : output_(std::move(output)),
+          next_index_(0),
+          pending_bytes_(0),
+          fragments_(),
+          eof_index_(nullopt) {}
 
   /*
    * Insert a new substring to be reassembled into a ByteStream.
@@ -41,6 +53,13 @@ public:
   // Access output stream writer, but const-only (can't write from outside)
   const Writer& writer() const { return output_.writer(); }
 
-private:
-  ByteStream output_;
+private:          
+  
+  void assemble_contiguous();  //push contiguous data to output
+
+    ByteStream output_;
+    uint64_t next_index_;
+    uint64_t pending_bytes_;
+    map<uint64_t, string> fragments_;
+    optional<uint64_t> eof_index_;
 };
